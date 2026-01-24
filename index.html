@@ -4,7 +4,16 @@
   <meta charset="UTF-8">
   <title>GreenPay</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Telegram -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     body {
@@ -30,12 +39,12 @@
       width: 100%;
       padding: 14px;
       background: #2E7D32;
-      color: white;
+      color: #fff;
       border: none;
       border-radius: 10px;
       font-size: 16px;
-      margin-top: 10px;
       cursor: pointer;
+      margin-top: 10px;
     }
     select, input {
       width: 100%;
@@ -49,6 +58,10 @@
       color: #555;
       margin-top: 6px;
     }
+    #map {
+      height: 300px;
+      border-radius: 10px;
+    }
   </style>
 </head>
 
@@ -56,6 +69,7 @@
 <div class="container">
   <h1>🌳 GreenPay</h1>
 
+  <!-- Daraxt turi -->
   <div class="card">
     <b>Daraxt turi</b>
     <select id="tree">
@@ -67,18 +81,20 @@
     </select>
   </div>
 
+  <!-- Rasm -->
   <div class="card">
-    <b>Daraxt rasmi</b>
+    <b>Daraxt rasmi (majburiy)</b>
     <input type="file" id="photo" accept="image/*" capture="environment">
-    <div class="info">Rasm majburiy</div>
   </div>
 
+  <!-- Xarita -->
   <div class="card">
-    <b>Joylashuv</b>
-    <button onclick="getLocation()">📍 Joylashuvni olish</button>
-    <div class="info" id="loc">Hali olinmadi</div>
+    <b>📍 Daraxt ekilgan joy</b>
+    <div id="map"></div>
+    <div class="info" id="loc">Xaritadan joy tanlang</div>
   </div>
 
+  <!-- Yuborish -->
   <div class="card">
     <button onclick="sendData()">✅ Yuborish</button>
   </div>
@@ -92,45 +108,47 @@ let latitude = null;
 let longitude = null;
 let photoBase64 = null;
 
+/* ===== RASM ===== */
 document.getElementById("photo").addEventListener("change", function () {
   const file = this.files[0];
+  if (!file) return;
   const reader = new FileReader();
   reader.onload = () => photoBase64 = reader.result;
   reader.readAsDataURL(file);
 });
 
-function getLocation() {
-  if (!Telegram.WebApp.location) {
-    alert("Joylashuv mavjud emas. GPS ni yoqing.");
-    return;
+/* ===== XARITA ===== */
+const map = L.map("map").setView([41.3111, 69.2797], 12); // Toshkent
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap"
+}).addTo(map);
+
+let marker = null;
+
+map.on("click", function (e) {
+  latitude = e.latlng.lat;
+  longitude = e.latlng.lng;
+
+  if (marker) {
+    marker.setLatLng(e.latlng);
+  } else {
+    marker = L.marker(e.latlng).addTo(map);
   }
 
-  latitude = Telegram.WebApp.location.latitude;
-  longitude = Telegram.WebApp.location.longitude;
-
   document.getElementById("loc").innerText =
-    "Lat: " + latitude.toFixed(5) +
-    ", Lng: " + longitude.toFixed(5);
-}
+    "Tanlandi: " +
+    latitude.toFixed(5) + ", " +
+    longitude.toFixed(5);
+});
 
+/* ===== YUBORISH ===== */
 function sendData() {
   const tree = document.getElementById("tree").value;
 
-  if (!tree || !latitude || !photoBase64) {
-    alert("Barcha ma’lumotlar majburiy");
+  if (!tree || !photoBase64 || !latitude) {
+    alert("❗ Daraxt turi, rasm va joy majburiy");
     return;
   }
-
-  Telegram.WebApp.sendData(JSON.stringify({
-    tree,
-    latitude,
-    longitude,
-    photo: photoBase64
-  }));
-
-  Telegram.WebApp.close();
-}
-
 
   tg.sendData(JSON.stringify({
     tree: tree,
@@ -144,5 +162,3 @@ function sendData() {
 </script>
 </body>
 </html>
-
-
