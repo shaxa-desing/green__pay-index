@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <title>GreenPay</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7f6;
+      color: #1b1b1b;
+    }
+    .container {
+      padding: 16px;
+    }
+    h1 {
+      color: #2E7D32;
+      text-align: center;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #2E7D32;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    select, input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .info {
+      font-size: 14px;
+      color: #555;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🌳 GreenPay</h1>
+
+    <div class="card">
+      <b>Daraxt turi</b>
+      <select id="tree">
+        <option value="">Tanlang</option>
+        <option value="Olma">Olma</option>
+        <option value="O‘rik">O‘rik</option>
+        <option value="Terak">Terak</option>
+        <option value="Qarag‘ay">Qarag‘ay</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <b>Joylashuv</b>
+      <button onclick="getLocation()">📍 Joylashuvni olish</button>
+      <div class="info" id="locationText">Hali olinmadi</div>
+    </div>
+
+    <div class="card">
+      <button onclick="sendData()">✅ Yuborish</button>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    let latitude = null;
+    let longitude = null;
+
+    function getLocation() {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          latitude = pos.coords.latitude;
+          longitude = pos.coords.longitude;
+          document.getElementById("locationText").innerText =
+            "Lat: " + latitude.toFixed(5) + ", Lng: " + longitude.toFixed(5);
+        },
+        () => {
+          alert("Joylashuvni olishga ruxsat berilmadi");
+        }
+      );
+    }
+
+    function sendData() {
+      const tree = document.getElementById("tree").value;
+
+      if (!tree || !latitude) {
+        alert("Barcha ma’lumotlarni to‘ldiring");
+        return;
+      }
+
+      const data = {
+        tree: tree,
+        latitude: latitude,
+        longitude: longitude
+      };
+
+      tg.sendData(JSON.stringify(data));
+      tg.close();
+    }
+  </script>
+</body>
+</html>
