@@ -79,6 +79,13 @@
     </div>
   </div>
 
+  <div class="card">
+  <b>Daraxt rasmi</b>
+  <input type="file" id="photo" accept="image/*" capture="environment">
+  <div class="info">Rasm olish majburiy</div>
+</div>
+
+
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
@@ -100,13 +107,34 @@
       );
     }
 
-    function sendData() {
-      const tree = document.getElementById("tree").value;
+<script>
+let photoBase64 = null;
 
-      if (!tree || !latitude) {
-        alert("Barcha ma’lumotlarni to‘ldiring");
-        return;
-      }
+document.getElementById("photo").addEventListener("change", function () {
+  const file = this.files[0];
+  const reader = new FileReader();
+  reader.onload = () => photoBase64 = reader.result;
+  reader.readAsDataURL(file);
+});
+
+function sendData() {
+  const tree = document.getElementById("tree").value;
+  if (!tree || !latitude || !photoBase64) {
+    alert("Barcha ma’lumotlar majburiy");
+    return;
+  }
+
+  Telegram.WebApp.sendData(JSON.stringify({
+    tree: tree,
+    latitude: latitude,
+    longitude: longitude,
+    photo: photoBase64
+  }));
+
+  Telegram.WebApp.close();
+}
+</script>
+
 
       const data = {
         tree: tree,
@@ -120,3 +148,4 @@
   </script>
 </body>
 </html>
+
