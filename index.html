@@ -5,69 +5,28 @@
   <title>GreenPay</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Telegram Mini App -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- Leaflet (Map) -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f5;
-    }
-    .container {
-      padding: 16px;
-    }
-    h1 {
-      text-align: center;
-      color: #2E7D32;
-    }
+    body { font-family: Arial; background:#f4f6f5; margin:0 }
+    .container { padding:16px }
+    h1 { text-align:center; color:#2E7D32 }
     .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      background:#fff; padding:16px; margin-bottom:16px;
+      border-radius:12px;
     }
     button {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 10px;
+      width:100%; padding:14px; border:none;
+      border-radius:10px; font-size:16px;
+      background:#2E7D32; color:#fff;
     }
-    .btn-green {
-      background: #2E7D32;
-      color: #fff;
-    }
-    .btn-gray {
-      background: #555;
-      color: #fff;
-    }
-    select, input {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-    .info {
-      font-size: 14px;
-      color: #555;
-      margin-top: 8px;
-    }
-    #map {
-      height: 250px;
-      border-radius: 10px;
-    }
+    select { width:100%; padding:12px; margin-top:8px }
+    #map { height:250px; border-radius:10px }
+    .info { margin-top:8px; color:#555 }
   </style>
 </head>
 
@@ -75,7 +34,6 @@
 <div class="container">
   <h1>🌳 GreenPay</h1>
 
-  <!-- Daraxt turi -->
   <div class="card">
     <b>Daraxt turi</b>
     <select id="tree">
@@ -87,23 +45,14 @@
     </select>
   </div>
 
-  <!-- Rasm -->
-  <div class="card">
-    <b>Daraxt rasmi (majburiy)</b>
-    <input type="file" id="photo" accept="image/*" capture="environment">
-  </div>
-
-  <!-- Xarita -->
   <div class="card">
     <b>📍 Daraxt ekilgan joy</b>
     <div id="map"></div>
-    <button class="btn-gray" onclick="confirmLocation()">📍 Joyni tasdiqlash</button>
     <div class="info" id="loc">Joy tanlanmagan</div>
   </div>
 
-  <!-- Yuborish -->
   <div class="card">
-    <button class="btn-green" onclick="sendData()">✅ Yuborish</button>
+    <button onclick="sendData()">✅ Yuborish</button>
   </div>
 </div>
 
@@ -112,72 +61,31 @@ const tg = Telegram.WebApp;
 tg.expand();
 tg.ready();
 
-let tempLat = null;
-let tempLng = null;
 let latitude = null;
 let longitude = null;
-let photoBase64 = null;
 
-/* ===== RASM ===== */
-document.getElementById("photo").addEventListener("change", function () {
-  const file = this.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => photoBase64 = reader.result;
-  reader.readAsDataURL(file);
-});
-
-/* ===== XARITA ===== */
-const map = L.map("map").setView([41.3111, 69.2797], 12); // Toshkent
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap"
-}).addTo(map);
+const map = L.map("map").setView([41.3111, 69.2797], 12);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
 
 let marker = null;
+map.on("click", e => {
+  latitude = e.latlng.lat;
+  longitude = e.latlng.lng;
 
-map.on("click", function (e) {
-  tempLat = e.latlng.lat;
-  tempLng = e.latlng.lng;
-
-  if (!marker) {
-    marker = L.marker(e.latlng).addTo(map);
-  } else {
-    marker.setLatLng(e.latlng);
-  }
+  if (!marker) marker = L.marker(e.latlng).addTo(map);
+  else marker.setLatLng(e.latlng);
 
   document.getElementById("loc").innerText =
-    "Tanlandi (tasdiqlanmagan): " +
-    tempLat.toFixed(5) + ", " + tempLng.toFixed(5);
+    "Tanlandi: " + latitude.toFixed(5) + ", " + longitude.toFixed(5);
 });
 
-/* ===== JOYNI TASDIQLASH ===== */
-function confirmLocation() {
-  if (!tempLat) {
-    tg.showPopup({
-      title: "Xatolik",
-      message: "Avval xaritadan joy tanlang",
-      buttons: [{ type: "ok" }]
-    });
-    return;
-  }
-
-  latitude = tempLat;
-  longitude = tempLng;
-
-  document.getElementById("loc").innerText =
-    "✅ Tasdiqlandi: " +
-    latitude.toFixed(5) + ", " + longitude.toFixed(5);
-}
-
-/* ===== YUBORISH ===== */
 function sendData() {
   const tree = document.getElementById("tree").value;
 
-  if (!tree || !photoBase64 || !latitude) {
+  if (!tree || !latitude) {
     tg.showPopup({
       title: "Xatolik",
-      message: "Daraxt turi, rasm va joy majburiy",
+      message: "Daraxt turi va joy majburiy",
       buttons: [{ type: "ok" }]
     });
     return;
@@ -186,8 +94,7 @@ function sendData() {
   tg.sendData(JSON.stringify({
     tree: tree,
     latitude: latitude,
-    longitude: longitude,
-    photo: photoBase64
+    longitude: longitude
   }));
 
   tg.close();
