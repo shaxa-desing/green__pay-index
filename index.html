@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>GreenPay</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -10,33 +10,32 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #f5f7f6;
-      color: #1b1b1b;
+      background: #f4f6f5;
     }
     .container {
       padding: 16px;
     }
     h1 {
-      color: #2E7D32;
       text-align: center;
+      color: #2E7D32;
     }
     .card {
       background: #fff;
       border-radius: 12px;
       padding: 16px;
       margin-bottom: 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     button {
       width: 100%;
       padding: 14px;
+      background: #2E7D32;
+      color: white;
       border: none;
       border-radius: 10px;
-      background: #2E7D32;
-      color: #fff;
       font-size: 16px;
-      cursor: pointer;
       margin-top: 10px;
+      cursor: pointer;
     }
     select, input {
       width: 100%;
@@ -48,66 +47,49 @@
     .info {
       font-size: 14px;
       color: #555;
-      margin-top: 8px;
+      margin-top: 6px;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <h1>🌳 GreenPay</h1>
+<div class="container">
+  <h1>🌳 GreenPay</h1>
 
-    <div class="card">
-      <b>Daraxt turi</b>
-      <select id="tree">
-        <option value="">Tanlang</option>
-        <option value="Olma">Olma</option>
-        <option value="O‘rik">O‘rik</option>
-        <option value="Terak">Terak</option>
-        <option value="Qarag‘ay">Qarag‘ay</option>
-      </select>
-    </div>
-
-    <div class="card">
-      <b>Joylashuv</b>
-      <button onclick="getLocation()">📍 Joylashuvni olish</button>
-      <div class="info" id="locationText">Hali olinmadi</div>
-    </div>
-
-    <div class="card">
-      <button onclick="sendData()">✅ Yuborish</button>
-    </div>
+  <div class="card">
+    <b>Daraxt turi</b>
+    <select id="tree">
+      <option value="">Tanlang</option>
+      <option>Olma</option>
+      <option>O‘rik</option>
+      <option>Terak</option>
+      <option>Qarag‘ay</option>
+    </select>
   </div>
 
   <div class="card">
-  <b>Daraxt rasmi</b>
-  <input type="file" id="photo" accept="image/*" capture="environment">
-  <div class="info">Rasm olish majburiy</div>
+    <b>Daraxt rasmi</b>
+    <input type="file" id="photo" accept="image/*" capture="environment">
+    <div class="info">Rasm majburiy</div>
+  </div>
+
+  <div class="card">
+    <b>Joylashuv</b>
+    <button onclick="getLocation()">📍 Joylashuvni olish</button>
+    <div class="info" id="loc">Hali olinmadi</div>
+  </div>
+
+  <div class="card">
+    <button onclick="sendData()">✅ Yuborish</button>
+  </div>
 </div>
 
-
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
-    let latitude = null;
-    let longitude = null;
-
-    function getLocation() {
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          latitude = pos.coords.latitude;
-          longitude = pos.coords.longitude;
-          document.getElementById("locationText").innerText =
-            "Lat: " + latitude.toFixed(5) + ", Lng: " + longitude.toFixed(5);
-        },
-        () => {
-          alert("Joylashuvni olishga ruxsat berilmadi");
-        }
-      );
-    }
-
 <script>
+const tg = Telegram.WebApp;
+tg.expand();
+
+let latitude = null;
+let longitude = null;
 let photoBase64 = null;
 
 document.getElementById("photo").addEventListener("change", function () {
@@ -117,6 +99,18 @@ document.getElementById("photo").addEventListener("change", function () {
   reader.readAsDataURL(file);
 });
 
+function getLocation() {
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      latitude = pos.coords.latitude;
+      longitude = pos.coords.longitude;
+      document.getElementById("loc").innerText =
+        "Lat: " + latitude.toFixed(5) + ", Lng: " + longitude.toFixed(5);
+    },
+    () => alert("Joylashuvga ruxsat berilmadi")
+  );
+}
+
 function sendData() {
   const tree = document.getElementById("tree").value;
   if (!tree || !latitude || !photoBase64) {
@@ -124,28 +118,15 @@ function sendData() {
     return;
   }
 
-  Telegram.WebApp.sendData(JSON.stringify({
+  tg.sendData(JSON.stringify({
     tree: tree,
     latitude: latitude,
     longitude: longitude,
     photo: photoBase64
   }));
 
-  Telegram.WebApp.close();
+  tg.close();
 }
 </script>
-
-
-      const data = {
-        tree: tree,
-        latitude: latitude,
-        longitude: longitude
-      };
-
-      tg.sendData(JSON.stringify(data));
-      tg.close();
-    }
-  </script>
 </body>
 </html>
-
