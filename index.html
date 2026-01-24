@@ -115,10 +115,22 @@ function getLocation() {
 
 function sendData() {
   const tree = document.getElementById("tree").value;
+
   if (!tree || !latitude || !photoBase64) {
     alert("Barcha ma’lumotlar majburiy");
     return;
   }
+
+  Telegram.WebApp.sendData(JSON.stringify({
+    tree,
+    latitude,
+    longitude,
+    photo: photoBase64
+  }));
+
+  Telegram.WebApp.close();
+}
+
 
   tg.sendData(JSON.stringify({
     tree: tree,
@@ -132,4 +144,5 @@ function sendData() {
 </script>
 </body>
 </html>
+
 
