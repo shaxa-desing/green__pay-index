@@ -100,15 +100,17 @@ document.getElementById("photo").addEventListener("change", function () {
 });
 
 function getLocation() {
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      latitude = pos.coords.latitude;
-      longitude = pos.coords.longitude;
-      document.getElementById("loc").innerText =
-        "Lat: " + latitude.toFixed(5) + ", Lng: " + longitude.toFixed(5);
-    },
-    () => alert("Joylashuvga ruxsat berilmadi")
-  );
+  if (!Telegram.WebApp.location) {
+    alert("Joylashuv mavjud emas. GPS ni yoqing.");
+    return;
+  }
+
+  latitude = Telegram.WebApp.location.latitude;
+  longitude = Telegram.WebApp.location.longitude;
+
+  document.getElementById("loc").innerText =
+    "Lat: " + latitude.toFixed(5) +
+    ", Lng: " + longitude.toFixed(5);
 }
 
 function sendData() {
@@ -130,3 +132,4 @@ function sendData() {
 </script>
 </body>
 </html>
+
